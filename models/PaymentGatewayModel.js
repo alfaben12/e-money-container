@@ -17,7 +17,13 @@ const PaymentGateway = sequelize.define(
 		name: {
 			type: Sequelize.STRING(255)
         },
-        position: {
+        payment_gateway_name: {
+			type: Sequelize.STRING(255)
+		},
+		api_key: {
+			type: Sequelize.TEXT
+		},
+		balance: {
 			type: Sequelize.INTEGER
 		},
 		createdAt: {
