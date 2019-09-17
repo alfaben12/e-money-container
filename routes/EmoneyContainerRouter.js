@@ -11,7 +11,6 @@ router.post(
 
 router.post(
     '/move/',
-	JWT.JWTverify,
 	EmoneyContainerController.processMoveToContainer
 );
 
