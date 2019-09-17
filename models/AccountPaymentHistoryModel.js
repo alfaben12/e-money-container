@@ -13,8 +13,11 @@ const AccountPaymentHistory = sequelize.define(
 		},
 		accountid: {
 			type: Sequelize.INTEGER
-        },
-        to_payment_gateway: {
+		},
+		from_payment_gateway_name: {
+			type: Sequelize.TEXT
+		},
+        to_payment_gateway_name: {
 			type: Sequelize.TEXT
         },
         nominal: {

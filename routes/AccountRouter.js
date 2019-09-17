@@ -9,4 +9,9 @@ router.get(
 	AccountController.processFetchAccountDatas
 );
 
+router.get(
+	'/:code',
+	AccountController.processFetchAccountDatasByCode
+);
+
 module.exports = router;

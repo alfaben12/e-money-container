@@ -14,6 +14,9 @@ const Account = sequelize.define(
 		balance: {
 			type: Sequelize.INTEGER
 		},
+		saving_balance: {
+			type: Sequelize.INTEGER
+		},
 		roleid: {
 			type: Sequelize.INTEGER
 		},

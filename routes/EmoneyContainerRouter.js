@@ -9,4 +9,10 @@ router.post(
 	EmoneyContainerController.processSetupPaymentGatewayContainer
 );
 
+router.post(
+    '/move/',
+	JWT.JWTverify,
+	EmoneyContainerController.processMoveToContainer
+);
+
 module.exports = router;
