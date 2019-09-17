@@ -14,6 +14,9 @@ const AccountPaymentHistory = sequelize.define(
 		accountid: {
 			type: Sequelize.INTEGER
 		},
+		uuid: {
+			type: Sequelize.TEXT
+        },
 		from_payment_gateway_name: {
 			type: Sequelize.TEXT
 		},
