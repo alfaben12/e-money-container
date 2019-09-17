@@ -115,8 +115,11 @@ module.exports = {
 			    accountid: accountid,
 			    from_payment_gateway_name: from_payment_gateway_name,
 			    to_payment_gateway_name: to_payment_gateway_name,
-			    nominal: nominal
+			    nominal: nominal,
+				uuid: uuid,
+				is_transferred: 1
 			};
+			
 			let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
 
 			let update = {
