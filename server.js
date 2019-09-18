@@ -8,7 +8,8 @@ const LoginRouter = require('./routes/LoginRouter');
 const RegisterRouter = require('./routes/RegisterRouter');
 const RoleRouter = require('./routes/RoleRouter');
 const EmoneyContainerRouter = require('./routes/EmoneyContainerRouter');
-const PaymentGatewayController = require('./routes/PaymentGatewayRouter');
+const PaymentGatewayRouter = require('./routes/PaymentGatewayRouter');
+const PaymentHistoryRouter = require('./routes/PaymentHistoryRouter');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,6 +35,7 @@ app.use('/logins', LoginRouter);
 app.use('/registers', RegisterRouter);
 app.use('/roles', RoleRouter);
 app.use('/emoneycontainers', EmoneyContainerRouter);
-app.use('/paymentgateways', PaymentGatewayController);
+app.use('/paymentgateways', PaymentGatewayRouter);
+app.use('/paymenthistorys', PaymentHistoryRouter);
 
 app.listen(process.env.RUN_PORT, () => console.log(`Example app listening on port ` + process.env.RUN_PORT));

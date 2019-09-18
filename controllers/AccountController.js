@@ -3,10 +3,10 @@ const ZSequelize = require('../libraries/ZSequelize');
 
 module.exports = {
 	processFetchAccountDatas: async function(req, res) {
-		/* PARAMETER ZSequelize VOUCHER  */
+		/* PARAMETER ZSequelize  */
 		let accountid = req.payload.accountid;
 
-		/* FETCH ZSequelize VOUCHER */
+		/* FETCH ZSequelize */
 		let account_result = await AccountHelper.getAccount(accountid);
 		
 		/* FETCTH RESULT & CONDITION & RESPONSE */
@@ -34,7 +34,7 @@ module.exports = {
 		/* PARAMETER ZSequelize VOUCHER  */
 		let code = req.params.code;
 		/* PARAMETER ZSequelize */
-		let field = ['id', 'code'];
+		let field = ['id', 'code', 'full_name'];
 		let where = {
 			code: code
 		};
@@ -64,5 +64,5 @@ module.exports = {
 				},
 			});
 		}
-	}
+	},
 }
