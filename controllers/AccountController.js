@@ -74,9 +74,10 @@ module.exports = {
 
 		/* GET ACC RESTULT BALANCE & SAVING */
 		let account_result = await AccountHelper.getAccount(accountid);
-		let account_saving_balance = account_result.dataValues.saving_balance;
+		let account_saving_balance = parseInt(account_result.dataValues.saving_balance, 10);
+		let account_balance = parseInt(account_result.dataValues.balance, 10);
 
-		if (balance_saving < account_saving_balance) {
+		if (balance_saving < account_balance) {
 			return res.status(400).json({
 				result : account_result.result,
 				data:{
