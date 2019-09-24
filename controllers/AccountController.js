@@ -129,28 +129,28 @@ module.exports = {
         let acc_email = req.body.email;
         let acc_address = req.body.address;
 
-		/* PARAMETER ZSequelize */
-		let validation_field = ['id', 'username', 'full_name', 'email'];
-		let validation_where = {
-			[Op.or]: [{username: acc_username}, {email: acc_email}]
-		};
+		// /* PARAMETER ZSequelize */
+		// let validation_field = ['id', 'username', 'full_name', 'email'];
+		// let validation_where = {
+		// 	[Op.or]: [{username: acc_username}, {email: acc_email}]
+		// };
 
-		let validation_orderBy = [['id', 'DESC']];
-		let validation_groupBy = false;
-		let validation_model = 'AccountModel';
+		// let validation_orderBy = [['id', 'DESC']];
+		// let validation_groupBy = false;
+		// let validation_model = 'AccountModel';
 
-		/* FETCH ZSequelize */
-		let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
+		// /* FETCH ZSequelize */
+		// let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
 
-		if (validation_accountData.dataValues != null) {
-			return res.status(409).json({
-				result : false,
-				data:{
-					code: 409,
-					message: "Failed account already registered."
-				},
-			});
-		}
+		// if (validation_accountData.dataValues != null) {
+		// 	return res.status(409).json({
+		// 		result : false,
+		// 		data:{
+		// 			code: 409,
+		// 			message: "Failed account already registered."
+		// 		},
+		// 	});
+		// }
 		
 		/* PARAMETER ZSequelize VOUCHER  */
 		let value = {
@@ -174,7 +174,7 @@ module.exports = {
 				result : account_update.result,
 				data: {
 					code: 200,
-					message: "Success setup saving."
+					message: "Success update account."
 				}
 			});
 		}else{
