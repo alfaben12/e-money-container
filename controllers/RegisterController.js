@@ -25,18 +25,26 @@ module.exports = {
 		let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
 
 		if (validation_accountData.dataValues != null) {
-			return res.status(200).json({
+			return res.status(409).json({
 				result : false,
 				data:{
-					code: 200,
+					code: 409,
 					message: "Failed account already registered."
 				},
 			});
 		}
 
+		var code           = '';
+		var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+		var charactersLength = characters.length;
+		for ( var i = 0; i < 5; i++ ) {
+			code += characters.charAt(Math.floor(Math.random() * charactersLength));
+		}
+
 		/* PARAMETER ZSequelize VOUCHER  */
 		let acc_value = {
 			roleid: acc_roleid,
+			code: code,
             username: acc_username,
             password: acc_password,
             full_name: acc_full_name,

@@ -14,4 +14,16 @@ router.get(
 	AccountController.processFetchAccountDatasByCode
 );
 
+router.put(
+	'/savings',
+	JWT.JWTverify,
+	AccountController.processSetupBalanceSaving
+);
+
+router.put(
+	'/',
+	JWT.JWTverify,
+	AccountController.processUpdateAccount
+);
+
 module.exports = router;

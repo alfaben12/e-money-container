@@ -23,6 +23,9 @@ const Account = sequelize.define(
 		username: {
 			type: Sequelize.STRING(255)
 		},
+		code: {
+			type: Sequelize.STRING(100)
+		},
 		password: {
 			type: Sequelize.TEXT
 		},

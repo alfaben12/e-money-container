@@ -92,77 +92,203 @@ module.exports = {
 						});
 					}
 
-					/* FETCH ZSequelize */
-					let field = ['id', 'payment_gateway_containerid', 'payment_gateway_account_apikey', 'balance'];
-					let where = {
-						accountid: accountid
-					};
-					let orderBy = false;
-					let groupBy = false;
-					let model = 'AccountPaymentContainerModel'
-					let joins = [
-						[
-							{
-								'fromModel' : 'AccountPaymentContainerModel',
-								'fromKey' : 'payment_gateway_containerid',
-								'bridgeType' : 'belongsTo',
-								'toModel' : 'PaymentGatewayContainerModel',
-								'toKey' : 'id',
-								'attributes' : ['id', 'name'],
-								'required' : true
+					/* GET ACC RESTULT BALANCE & SAVING */
+					let account_result = await AccountHelper.getAccount(accountid);
+					let account_balance = account_result.dataValues.balance;
+					let account_saving_balance = account_result.dataValues.saving_balance;
+
+					if (account_saving_balance != 0) {
+						if (account_balance < account_saving_balance) {
+							let update = {
+								balance: account_balance + nominal
+							};
+	
+							/* UPDATE */
+							let where_account = {
+								id: accountid
+							};
+							let result_account = await ZSequelize.updateValues(update, where_account, "AccountModel");
+							let to_payment_gateway_name = "SAVING";
+							let balance = account_balance;
+							
+							let insert = {
+								accountid: accountid,
+								from_payment_gateway_name: from_payment_gateway_name,
+								to_payment_gateway_name: to_payment_gateway_name,
+								nominal: nominal,
+								uuid: uuid,
+								is_transferred: 1
+							};
+							
+							let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
+	
+							/* FETCTH RESULT & CONDITION & RESPONSE */
+							if (result_insert.result) {
+								return res.status(200).json({
+									result : result_insert.result,
+									data:{
+										code: 200,
+										message: "Success move balance to SAVING."
+									}
+								});
+							}else{
+								return res.status(404).json({
+									result : result_insert.result,
+									data:{
+										code: 404,
+										message: "Data not found."
+									}
+								});
 							}
-						]
-					];
-					let container = await ZSequelize.fetchJoins(false, field, where, orderBy, groupBy, model, joins);
-					let to_payment_gateway_name = container.dataValues.payment_gateway_container.name;
-					let payment_gateway_account_apikey = container.dataValues.payment_gateway_account_apikey;
-					let balance = container.dataValues.balance;
-					
-					let insert = {
-						accountid: accountid,
-						from_payment_gateway_name: from_payment_gateway_name,
-						to_payment_gateway_name: to_payment_gateway_name,
-						nominal: nominal,
-						uuid: uuid,
-						is_transferred: 1
-					};
-					
-					let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
+						}else{
+							/* FETCH ZSequelize */
+							let field = ['id', 'payment_gateway_containerid', 'payment_gateway_account_apikey', 'balance'];
+							let where = {
+								accountid: accountid
+							};
+							let orderBy = false;
+							let groupBy = false;
+							let model = 'AccountPaymentContainerModel'
+							let joins = [
+								[
+									{
+										'fromModel' : 'AccountPaymentContainerModel',
+										'fromKey' : 'payment_gateway_containerid',
+										'bridgeType' : 'belongsTo',
+										'toModel' : 'PaymentGatewayContainerModel',
+										'toKey' : 'id',
+										'attributes' : ['id', 'name'],
+										'required' : true
+									}
+								]
+							];
 
-					let update = {
-						balance: balance + nominal
-					};
+							let container = await ZSequelize.fetchJoins(false, field, where, orderBy, groupBy, model, joins);
+							let to_payment_gateway_name = container.dataValues.payment_gateway_container.name;
+							let payment_gateway_account_apikey = container.dataValues.payment_gateway_account_apikey;
+							let balance = container.dataValues.balance;
 
-					/* UPDATE */
-					let where_container_account = {
-						accountid: accountid
-					};
+							let insert = {
+								accountid: accountid,
+								from_payment_gateway_name: from_payment_gateway_name,
+								to_payment_gateway_name: to_payment_gateway_name,
+								nominal: nominal,
+								uuid: uuid,
+								is_transferred: 1
+							};
 
-					/* UPDATE */
-					let where_container = {
-						api_key: payment_gateway_account_apikey
-					};
+							let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
 
-					let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
-					let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");
+							let update = {
+								balance: balance + nominal
+							};
 
-					/* FETCTH RESULT & CONDITION & RESPONSE */
-					if (result_container.result) {
-						return res.status(200).json({
-							result : result_container.result,
-							data:{
-								code: 200,
-								message: "Success move balance."
+							/* UPDATE */
+							let where_container_account = {
+								accountid: accountid
+							};
+
+							/* UPDATE */
+							let where_container = {
+								api_key: payment_gateway_account_apikey
+							};
+
+							let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
+							let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");
+
+							/* FETCTH RESULT & CONDITION & RESPONSE */
+							if (result_container.result) {
+								return res.status(200).json({
+									result : result_container.result,
+									data:{
+										code: 200,
+										message: "Success move balance to CONTAINER."
+									}
+								});
+							}else{
+								return res.status(404).json({
+									result : result_container.result,
+									data:{
+										code: 404,
+										message: "Data not found."
+									}
+								});
 							}
-						});
+						}
 					}else{
-						return res.status(404).json({
-							result : result_container.result,
-							data:{
-								code: 404,
-								message: "Data not found."
-							}
-						});
+						/* FETCH ZSequelize */
+						let field = ['id', 'payment_gateway_containerid', 'payment_gateway_account_apikey', 'balance'];
+						let where = {
+							accountid: accountid
+						};
+						let orderBy = false;
+						let groupBy = false;
+						let model = 'AccountPaymentContainerModel'
+						let joins = [
+							[
+								{
+									'fromModel' : 'AccountPaymentContainerModel',
+									'fromKey' : 'payment_gateway_containerid',
+									'bridgeType' : 'belongsTo',
+									'toModel' : 'PaymentGatewayContainerModel',
+									'toKey' : 'id',
+									'attributes' : ['id', 'name'],
+									'required' : true
+								}
+							]
+						];
+
+						let container = await ZSequelize.fetchJoins(false, field, where, orderBy, groupBy, model, joins);
+						let to_payment_gateway_name = container.dataValues.payment_gateway_container.name;
+						let payment_gateway_account_apikey = container.dataValues.payment_gateway_account_apikey;
+						let balance = container.dataValues.balance;
+
+						let insert = {
+							accountid: accountid,
+							from_payment_gateway_name: from_payment_gateway_name,
+							to_payment_gateway_name: to_payment_gateway_name,
+							nominal: nominal,
+							uuid: uuid,
+							is_transferred: 1
+						};
+
+						let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
+
+						let update = {
+							balance: balance + nominal
+						};
+
+						/* UPDATE */
+						let where_container_account = {
+							accountid: accountid
+						};
+
+						/* UPDATE */
+						let where_container = {
+							api_key: payment_gateway_account_apikey
+						};
+
+						let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
+						let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");
+
+						/* FETCTH RESULT & CONDITION & RESPONSE */
+						if (result_container.result) {
+							return res.status(200).json({
+								result : result_container.result,
+								data:{
+									code: 200,
+									message: "Success move balance to CONTAINER."
+								}
+							});
+						}else{
+							return res.status(404).json({
+								result : result_container.result,
+								data:{
+									code: 404,
+									message: "Data not found."
+								}
+							});
+						}
 					}
 				});
 			}
