@@ -1,6 +1,7 @@
 const AccountHelper = require('../helpers/AccountHelper');
 const ZSequelize = require('../libraries/ZSequelize');
 const request = require('request')
+const Op = require('sequelize').Op;
 
 module.exports = {
 	processSetupPaymentGatewayContainer: async function(req, res) {
@@ -14,12 +15,35 @@ module.exports = {
         let payment_gateway_account_apikey = req.body.payment_gateway_account_apikey;
         let balance = req.body.balance;
 
-        let value = {
+		/* PARAMETER ZSequelize */
+		let validation_field = ['accountid', 'api_key', 'balance'];
+		let validation_where = {
+			[Op.and]: [{accountid: accountid}, {api_key: payment_gateway_account_apikey}]
+		};
+
+		let validation_orderBy = [['accountid', 'DESC']];
+		let validation_groupBy = false;
+		let validation_model = 'ApiPaymentGatewayAccountModel';
+
+		/* FETCH ZSequelize */
+		let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
+
+		let value = {
             accountid: accountid,
             payment_gateway_containerid: payment_gateway_containerid,
             payment_gateway_account_apikey: payment_gateway_account_apikey,
-            balance: balance
-        };
+            balance: validation_accountData.dataValues.balance
+		};
+
+		if (validation_accountData.dataValues == null) {
+			return res.status(400).json({
+				result : false,
+				data:{
+					code: 400,
+					message: "Failed account can't integrated or third-party not found."
+				},
+			});
+		}
 
         /* FETCTH RESULT & CONDITION & RESPONSE */
 		if (account_result.dataValues.account_payment_container != null) {
