@@ -27,13 +27,6 @@ module.exports = {
 		/* FETCH ZSequelize */
 		let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
 
-		let value = {
-            accountid: accountid,
-            payment_gateway_containerid: payment_gateway_containerid,
-            payment_gateway_account_apikey: payment_gateway_account_apikey,
-            balance: validation_accountData.dataValues.balance
-		};
-
 		if (validation_accountData.dataValues == null) {
 			return res.status(400).json({
 				result : false,
@@ -44,6 +37,13 @@ module.exports = {
 			});
 		}
 
+		let value = {
+            accountid: accountid,
+            payment_gateway_containerid: payment_gateway_containerid,
+            payment_gateway_account_apikey: payment_gateway_account_apikey,
+            balance: validation_accountData.dataValues.balance
+		};
+		
         /* FETCTH RESULT & CONDITION & RESPONSE */
 		if (account_result.dataValues.account_payment_container != null) {
             /* UPDATE */
