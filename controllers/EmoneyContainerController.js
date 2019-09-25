@@ -17,7 +17,7 @@ module.exports = {
 		/* PARAMETER ZSequelize */
 		let validation_field = ['accountid', 'api_key', 'balance'];
 		let validation_where = {
-			[Op.and]: [{accountid: accountid}, {api_key: payment_gateway_account_apikey}]
+			[Op.and]: [{accountid: accountid}, {api_key: payment_gateway_account_apikey}, {payment_gateway_name: payment_gateway_containerid}]
 		};
 
 		let validation_orderBy = [['accountid', 'DESC']];
@@ -36,12 +36,13 @@ module.exports = {
 				},
 			});
 		}
+		let balance = parseInt(validation_accountData.dataValues.balance);
 
 		let value = {
             accountid: accountid,
             payment_gateway_containerid: payment_gateway_containerid,
             payment_gateway_account_apikey: payment_gateway_account_apikey,
-            balance: validation_accountData.dataValues.balance
+            balance: balance
 		};
 		
         /* FETCTH RESULT & CONDITION & RESPONSE */

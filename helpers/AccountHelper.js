@@ -27,7 +27,7 @@ exports.getAccount = async function(accountid) {
 				'bridgeType' : 'hasOne',
 				'toModel' : 'AccountPaymentContainerModel',
 				'toKey' : 'accountid',
-				'attributes' : ['id', 'payment_gateway_containerid', 'balance', 'api_key', 'createdAt', 'updatedAt'],
+				'attributes' : ['id', 'payment_gateway_containerid', 'balance', 'payment_gateway_account_apikey', 'createdAt', 'updatedAt'],
 				'required' : false
 			}
 		]
