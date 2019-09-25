@@ -13,7 +13,6 @@ module.exports = {
         
         let payment_gateway_containerid = req.body.payment_gateway_containerid;
         let payment_gateway_account_apikey = req.body.payment_gateway_account_apikey;
-        let balance = req.body.balance;
 
 		/* PARAMETER ZSequelize */
 		let validation_field = ['accountid', 'api_key', 'balance'];
