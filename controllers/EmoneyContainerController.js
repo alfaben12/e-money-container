@@ -2,6 +2,7 @@ const AccountHelper = require('../helpers/AccountHelper');
 const ZSequelize = require('../libraries/ZSequelize');
 const request = require('request')
 const Op = require('sequelize').Op;
+const sequelize = require('sequelize');
 
 module.exports = {
 	processSetupPaymentGatewayContainer: async function(req, res) {
@@ -75,6 +76,7 @@ module.exports = {
 	},
 
 	processMoveToContainer: async function(req, res) {
+		/* PARAMETER ZSequelize  */
 		let from_payment_gateway_name = req.body.payment_gateway_name;
 		let nominal = parseInt(req.body.nominal, 10);
 		let uuid = req.body.uuid;
@@ -192,46 +194,100 @@ module.exports = {
 							let payment_gateway_account_apikey = container.dataValues.payment_gateway_account_apikey;
 							let balance = container.dataValues.balance;
 
+							/* TRANSACTION */
+							/* PARAMETER VALIDATION */
+							let validationField = [
+								[sequelize.fn('IFNULL', (sequelize.fn('sum', sequelize.col('nominal'))), 0), 'transaction_total']
+							];
+							let validationWhere = {
+								accountid: accountid,
+								is_transferred: 1,
+								[Op.not]: [{to_payment_gateway_name: 'SAVING'}]
+							};
+
+							let validationOrderBy = false;
+							let validationGroupBy = false;
+							let validationModel = 'AccountPaymentHistoryModel';
+
+							/* FETCH Duplicate Data */
+							let validationTransaction = await ZSequelize.fetch(true, validationField, validationWhere, validationOrderBy, validationGroupBy, validationModel);
+							let data = {
+								'transaction_total': validationTransaction.dataValues
+							};
+
+							let cartTotal = data.transaction_total;
+							let transaction_total = parseInt(cartTotal[0].dataValues.transaction_total, 10);
+							/* END TRANSACTION */
+
+							/* GET ACC RESULT LIMIT TRANSACTION */
+							let account_result = await AccountHelper.getAccount(accountid);
+							let account_limit_transaction = parseInt(account_result.dataValues.account_role.transaction_limit, 10);
+							transaction_total = transaction_total + nominal;
+							
+							/* END GET ACC RESULT LIMIT TRANSACTION */
+
+							let is_transferred = 0;
+							if (account_limit_transaction < transaction_total) {
+								// return res.status(400).json({
+								// 	result : account_result.result,
+								// 	data:{
+								// 		code: 400,
+								// 		message: "Your account can't received because limit transaction."
+								// 	},
+								// });
+								is_transferred = 0;
+							}else{
+								is_transferred = 1;
+							}
+
 							let insert = {
 								accountid: accountid,
 								from_payment_gateway_name: from_payment_gateway_name,
 								to_payment_gateway_name: to_payment_gateway_name,
 								nominal: nominal,
 								uuid: uuid,
-								is_transferred: 1
+								is_transferred: is_transferred
 							};
 
 							let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
 
-							let update = {
-								balance: balance + nominal
-							};
+							let container_message = "CONTAINER";
+							if (is_transferred == 1) {
+								let update = {
+									balance: balance + nominal
+								};
+	
+								/* UPDATE */
+								let where_container_account = {
+									accountid: accountid
+								};
+	
+								/* UPDATE */
+								let where_container = {
+									api_key: payment_gateway_account_apikey
+								};
+	
+								let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
+								let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");	
+								container_message = "CONTAINER";
+							}else{
+								container_message = "TEMP CONTAINER";
+							}
 
-							/* UPDATE */
-							let where_container_account = {
-								accountid: accountid
-							};
-
-							/* UPDATE */
-							let where_container = {
-								api_key: payment_gateway_account_apikey
-							};
-
-							let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
-							let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");
+							let result_container_condition = true;
 
 							/* FETCTH RESULT & CONDITION & RESPONSE */
-							if (result_container.result) {
+							if (result_container_condition) {
 								return res.status(200).json({
-									result : result_container.result,
+									result : result_container_condition,
 									data:{
 										code: 200,
-										message: "Success move balance to CONTAINER."
+										message: "Success move balance to "+ container_message
 									}
 								});
 							}else{
 								return res.status(404).json({
-									result : result_container.result,
+									result : false,
 									data:{
 										code: 404,
 										message: "Data not found."
@@ -267,46 +323,100 @@ module.exports = {
 						let payment_gateway_account_apikey = container.dataValues.payment_gateway_account_apikey;
 						let balance = container.dataValues.balance;
 
+						/* TRANSACTION */
+						/* PARAMETER VALIDATION */
+						let validationField = [
+							[sequelize.fn('IFNULL', (sequelize.fn('sum', sequelize.col('nominal'))), 0), 'transaction_total']
+						];
+						let validationWhere = {
+							accountid: accountid,
+							is_transferred: 1,
+							[Op.not]: [{to_payment_gateway_name: 'SAVING'}]
+						};
+
+						let validationOrderBy = false;
+						let validationGroupBy = false;
+						let validationModel = 'AccountPaymentHistoryModel';
+
+						/* FETCH Duplicate Data */
+						let validationTransaction = await ZSequelize.fetch(true, validationField, validationWhere, validationOrderBy, validationGroupBy, validationModel);
+						let data = {
+							'transaction_total': validationTransaction.dataValues
+						};
+
+						let cartTotal = data.transaction_total;
+						let transaction_total = parseInt(cartTotal[0].dataValues.transaction_total, 10);
+						/* END TRANSACTION */
+
+						/* GET ACC RESULT LIMIT TRANSACTION */
+						let account_result = await AccountHelper.getAccount(accountid);
+						let account_limit_transaction = parseInt(account_result.dataValues.account_role.transaction_limit, 10);
+						transaction_total = transaction_total + nominal;
+						
+						/* END GET ACC RESULT LIMIT TRANSACTION */
+
+						let is_transferred = 0;
+						if (account_limit_transaction < transaction_total) {
+							// return res.status(400).json({
+							// 	result : account_result.result,
+							// 	data:{
+							// 		code: 400,
+							// 		message: "Your account can't received because limit transaction."
+							// 	},
+							// });
+							is_transferred = 0;
+						}else{
+							is_transferred = 1;
+						}
+
 						let insert = {
 							accountid: accountid,
 							from_payment_gateway_name: from_payment_gateway_name,
 							to_payment_gateway_name: to_payment_gateway_name,
 							nominal: nominal,
 							uuid: uuid,
-							is_transferred: 1
+							is_transferred: is_transferred
 						};
 
 						let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
 
-						let update = {
-							balance: balance + nominal
-						};
+						let container_message = "CONTAINER";
+						if (is_transferred == 1) {
+							let update = {
+								balance: balance + nominal
+							};
 
-						/* UPDATE */
-						let where_container_account = {
-							accountid: accountid
-						};
+							/* UPDATE */
+							let where_container_account = {
+								accountid: accountid
+							};
 
-						/* UPDATE */
-						let where_container = {
-							api_key: payment_gateway_account_apikey
-						};
+							/* UPDATE */
+							let where_container = {
+								api_key: payment_gateway_account_apikey
+							};
 
-						let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
-						let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");
+							let result_container_account = await ZSequelize.updateValues(update, where_container_account, "AccountPaymentContainerModel");
+							let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");	
+							container_message = "CONTAINER";
+						}else{
+							container_message = "TEMP CONTAINER";
+						}
+
+						let result_container_condition = true;
 
 						/* FETCTH RESULT & CONDITION & RESPONSE */
-						if (result_container.result) {
+						if (result_container_condition) {
 							return res.status(200).json({
-								result : result_container.result,
+								result : result_container_condition,
 								data:{
 									code: 200,
-									message: "Success move balance to CONTAINER."
+									message: "Success move balance to "+ container_message
 								}
 							});
 						}else{
 							return res.status(404).json({
-								result : result_container.result,
+								result : false,
 								data:{
 									code: 404,
 									message: "Data not found."

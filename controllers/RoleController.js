@@ -3,7 +3,7 @@ const ZSequelize = require('../libraries/ZSequelize');
 module.exports = {
 	processGetRoleAccount: async function(req, res){
 		/* PARAMETER ZSequelize */
-		let field = ['id', 'name'];
+		let field = ['id', 'name', 'transaction_limit', 'price_sell'];
 		let where = false;
 		let orderBy = [['id', 'ASC']];
 		let groupBy = false;

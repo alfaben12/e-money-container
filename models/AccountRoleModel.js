@@ -11,6 +11,9 @@ const AccountRole = sequelize.define(
 			primaryKey: true,
 			autoIncrement: true
 		},
+		transaction_limit: {
+			type: Sequelize.INTEGER
+		},
 		name: {
 			type: Sequelize.STRING(255)
 		},

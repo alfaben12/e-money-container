@@ -4,7 +4,7 @@ const Op = require('sequelize').Op;
 module.exports = {
     processAccountRegister: async function(req, res) {
 		/* POST BODY */
-		let acc_roleid = req.body.roleid;
+		let acc_roleid = 2;
         let acc_username = req.body.username;
         let acc_password = req.body.password;
         let acc_full_name = req.body.full_name;
