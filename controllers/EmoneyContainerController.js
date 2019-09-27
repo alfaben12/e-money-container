@@ -91,6 +91,7 @@ module.exports = {
 		}, async function(error, response) {
 			mutation_flag = JSON.parse(response.body);
 			mutation_flag = mutation_flag.result;
+
 			if (mutation_flag == false) {
 				return res.status(200).json({
 					result : mutation_flag,
