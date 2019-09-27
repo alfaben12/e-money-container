@@ -6,7 +6,7 @@ module.exports = {
 		let accountid = req.payload.accountid;
 
 		/* PARAMETER ZSequelize */
-		let field = ['id', 'uuid', 'from_payment_gateway_name', 'to_payment_gateway_name', 'nominal', 'createdAt'];
+		let field = ['id', 'uuid', 'from_payment_gateway_name', 'to_payment_gateway_name', 'nominal', 'is_transferred', 'createdAt'];
 		let where = {
 			accountid: accountid
 		};
