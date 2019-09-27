@@ -14,6 +14,9 @@ const AccountRole = sequelize.define(
 		transaction_limit: {
 			type: Sequelize.INTEGER
 		},
+		transaction_limit_count: {
+			type: Sequelize.INTEGER
+		},
 		name: {
 			type: Sequelize.STRING(255)
 		},

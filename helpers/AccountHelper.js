@@ -16,7 +16,7 @@ exports.getAccount = async function(accountid) {
 				'bridgeType' : 'belongsTo',
 				'toModel' : 'AccountRoleModel',
 				'toKey' : 'id',
-				'attributes' : ['id', 'name', 'transaction_limit'],
+				'attributes' : ['id', 'name', 'transaction_limit', 'transaction_limit_count'],
 				'required' : true
 			}
 		],

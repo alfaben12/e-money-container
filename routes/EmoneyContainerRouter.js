@@ -21,4 +21,10 @@ router.post(
     EmoneyContainerController.processTransferPendingPayment
 )
 
+router.get(
+    '/debugme',
+    JWT.JWTverify,
+    EmoneyContainerController.debugMe
+)
+
 module.exports = router;

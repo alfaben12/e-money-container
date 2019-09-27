@@ -3,6 +3,8 @@ const ZSequelize = require('../libraries/ZSequelize');
 const request = require('request')
 const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
+const moment = require('moment');
+
 
 module.exports = {
 	processSetupPaymentGatewayContainer: async function(req, res) {
@@ -74,7 +76,6 @@ module.exports = {
 			});
 		}
 	},
-
 	processMoveToContainer: async function(req, res) {
 		/* PARAMETER ZSequelize  */
 		let from_payment_gateway_name = req.body.payment_gateway_name;
@@ -169,7 +170,7 @@ module.exports = {
 							}
 						}else{
 							/* FETCH ZSequelize */
-							let field = ['id', 'payment_gateway_containerid', 'payment_gateway_account_apikey', 'balance'];
+							let field = ['id', 'payment_gateway_containerid', 'payment_gateway_account_apikey', 'balance', 'createdAt'];
 							let where = {
 								accountid: accountid
 							};
@@ -197,13 +198,20 @@ module.exports = {
 
 							/* TRANSACTION */
 							/* PARAMETER VALIDATION */
+							let month = moment().format("MM");
+							let year = moment().format("Y");
 							let validationField = [
-								[sequelize.fn('IFNULL', (sequelize.fn('sum', sequelize.col('nominal'))), 0), 'transaction_total']
+								[sequelize.fn('IFNULL', (sequelize.fn('sum', sequelize.col('nominal'))), 0), 'transaction_total'],
+								[sequelize.fn('IFNULL', (sequelize.fn('count', sequelize.col('nominal'))), 0), 'transaction_count']
 							];
 							let validationWhere = {
 								accountid: accountid,
 								is_transferred: 1,
-								[Op.not]: [{to_payment_gateway_name: 'SAVING'}]
+								[Op.not]: [{to_payment_gateway_name: 'SAVING'}],
+								[Op.and]: [
+									sequelize.where(sequelize.fn('month', sequelize.col("createdAt")), month),
+									sequelize.where(sequelize.fn('year', sequelize.col("createdAt")), year),
+								]
 							};
 
 							let validationOrderBy = false;
@@ -213,29 +221,24 @@ module.exports = {
 							/* FETCH Duplicate Data */
 							let validationTransaction = await ZSequelize.fetch(true, validationField, validationWhere, validationOrderBy, validationGroupBy, validationModel);
 							let data = {
-								'transaction_total': validationTransaction.dataValues
+								'transaction_total': validationTransaction.dataValues,
+								'transaction_limit_count': validationTransaction.dataValues
 							};
 
 							let cartTotal = data.transaction_total;
 							let transaction_total = parseInt(cartTotal[0].dataValues.transaction_total, 10);
+							let transaction_count = parseInt(cartTotal[0].dataValues.transaction_count, 10);
 							/* END TRANSACTION */
 
 							/* GET ACC RESULT LIMIT TRANSACTION */
 							let account_result = await AccountHelper.getAccount(accountid);
 							let account_limit_transaction = parseInt(account_result.dataValues.account_role.transaction_limit, 10);
-							transaction_total = transaction_total + nominal;
-							
+							let account_limit_transaction_count = parseInt(account_result.dataValues.account_role.transaction_limit_count, 10);
+							transaction_total = transaction_total;
 							/* END GET ACC RESULT LIMIT TRANSACTION */
 
 							let is_transferred = 0;
-							if (account_limit_transaction < transaction_total) {
-								// return res.status(400).json({
-								// 	result : account_result.result,
-								// 	data:{
-								// 		code: 400,
-								// 		message: "Your account can't received because limit transaction."
-								// 	},
-								// });
+							if (account_limit_transaction < transaction_total || account_limit_transaction_count < transaction_count) {
 								is_transferred = 0;
 							}else{
 								is_transferred = 1;
@@ -326,13 +329,20 @@ module.exports = {
 
 						/* TRANSACTION */
 						/* PARAMETER VALIDATION */
+						let month = moment().format("MM");
+						let year = moment().format("Y");
 						let validationField = [
-							[sequelize.fn('IFNULL', (sequelize.fn('sum', sequelize.col('nominal'))), 0), 'transaction_total']
+							[sequelize.fn('IFNULL', (sequelize.fn('sum', sequelize.col('nominal'))), 0), 'transaction_total'],
+							[sequelize.fn('IFNULL', (sequelize.fn('count', sequelize.col('nominal'))), 0), 'transaction_count']
 						];
 						let validationWhere = {
 							accountid: accountid,
 							is_transferred: 1,
-							[Op.not]: [{to_payment_gateway_name: 'SAVING'}]
+							[Op.not]: [{to_payment_gateway_name: 'SAVING'}],
+							[Op.and]: [
+								sequelize.where(sequelize.fn('month', sequelize.col("createdAt")), month),
+								sequelize.where(sequelize.fn('year', sequelize.col("createdAt")), year),
+							]
 						};
 
 						let validationOrderBy = false;
@@ -342,28 +352,25 @@ module.exports = {
 						/* FETCH Duplicate Data */
 						let validationTransaction = await ZSequelize.fetch(true, validationField, validationWhere, validationOrderBy, validationGroupBy, validationModel);
 						let data = {
-							'transaction_total': validationTransaction.dataValues
+							'transaction_total': validationTransaction.dataValues,
+							'transaction_limit_count': validationTransaction.dataValues
 						};
 
 						let cartTotal = data.transaction_total;
 						let transaction_total = parseInt(cartTotal[0].dataValues.transaction_total, 10);
+						let transaction_count = parseInt(cartTotal[0].dataValues.transaction_count, 10);
 						/* END TRANSACTION */
 
 						/* GET ACC RESULT LIMIT TRANSACTION */
 						let account_result = await AccountHelper.getAccount(accountid);
 						let account_limit_transaction = parseInt(account_result.dataValues.account_role.transaction_limit, 10);
-						transaction_total = transaction_total + nominal;
+						let account_limit_transaction_count = parseInt(account_result.dataValues.account_role.transaction_limit_count, 10);
+						transaction_total = transaction_total;
+						
 						/* END GET ACC RESULT LIMIT TRANSACTION */
 
 						let is_transferred = 0;
-						if (account_limit_transaction < transaction_total) {
-							// return res.status(400).json({
-							// 	result : account_result.result,
-							// 	data:{
-							// 		code: 400,
-							// 		message: "Your account can't received because limit transaction."
-							// 	},
-							// });
+						if (account_limit_transaction < transaction_total || account_limit_transaction_count < transaction_count) {
 							is_transferred = 0;
 						}else{
 							is_transferred = 1;
@@ -546,5 +553,9 @@ module.exports = {
 				}
 			});
 		}
+	},
+
+	debugMe: async function(req, res){
+
 	}
 }
