@@ -39,11 +39,25 @@ module.exports = {
 				},
 			});
 		}
+
+		/* PARAMETER ZSequelize */
+		let container_field = ['id'];
+		let container_where = {
+			name: payment_gateway_containerid
+		};
+
+		let container_orderBy = [['id', 'DESC']];
+		let container_groupBy = false;
+		let container_model = 'PaymentGatewayContainerModel';
+
+		/* FETCH ZSequelize */
+		let container_accountData = await ZSequelize.fetch(false, container_field, container_where, container_orderBy, container_groupBy, container_model);
 		let balance = parseInt(validation_accountData.dataValues.balance);
+		let real_payment_gateway_containerid = container_accountData.dataValues.id;
 
 		let value = {
             accountid: accountid,
-            payment_gateway_containerid: payment_gateway_containerid,
+            payment_gateway_containerid: real_payment_gateway_containerid,
             payment_gateway_account_apikey: payment_gateway_account_apikey,
             balance: balance
 		};
