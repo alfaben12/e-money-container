@@ -25,6 +25,9 @@ const AccountPaymentHistory = sequelize.define(
         },
         nominal: {
             type: Sequelize.INTEGER
+		},
+		charge: {
+            type: Sequelize.INTEGER
         },
 		createdAt: {
 			type: 'TIMESTAMP',
