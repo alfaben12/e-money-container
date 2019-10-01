@@ -696,7 +696,22 @@ module.exports = {
 			payment_gateway_name: payment_gateway_name
 		};
 
-		let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");	
+		let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");
+		let account_result = await AccountHelper.getAccount(accountid);
+
+		let payment_gateway_account_apikey = account_result.dataValues.account_payment_container.payment_gateway_account_apikey;
+		
+		/* UPDATE */
+		let update1 = {
+			balance : balance - nominal
+		};
+
+		let where_container1 = {
+			accountid: accountid,
+			payment_gateway_account_apikey: payment_gateway_account_apikey
+		};
+
+		let result_container1 = await ZSequelize.updateValues(update1, where_container1, "AccountPaymentContainerModel");
 
 		/* FETCTH RESULT & CONDITION & RESPONSE */
 		if (result_container.result) {
@@ -719,6 +734,5 @@ module.exports = {
 	},
 
 	debugMe: async function(req, res){
-
 	}
 }
