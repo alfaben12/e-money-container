@@ -101,7 +101,7 @@ module.exports = {
 		/* PARAMETER ZSequelize */
 		let validation_field = ['accountid', 'api_key', 'balance'];
 		let validation_where = {
-			[Op.and]: [{accountid: from_accountid}, {payment_gateway_name: payment_gateway_name}]
+			[Op.and]: [{accountid: from_accountid}, {payment_gateway_name: from_payment_gateway_name}]
 		};
 
 		let validation_orderBy = [['accountid', 'DESC']];
@@ -120,7 +120,7 @@ module.exports = {
 				},
 			});
 		}
-		
+
 		let balance = parseInt(validation_accountData.dataValues.balance);
 
 		if (balance < nominal) {
