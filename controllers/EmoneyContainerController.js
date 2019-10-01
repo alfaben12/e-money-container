@@ -613,7 +613,78 @@ module.exports = {
 			});
 		}
 	},
-	
+
+	processUpdateBalanceApi: async function(req, res){
+		let nominal = parseInt(req.body.nominal, 10);
+		let accountid = parseInt(req.body.accountid, 10);
+		let payment_gateway_name = req.body.payment_gateway_name;
+
+		/* PARAMETER ZSequelize */
+		let validation_field = ['accountid', 'api_key', 'balance'];
+		let validation_where = {
+			[Op.and]: [{accountid: accountid}, {payment_gateway_name: payment_gateway_name}]
+		};
+
+		let validation_orderBy = [['accountid', 'DESC']];
+		let validation_groupBy = false;
+		let validation_model = 'ApiPaymentGatewayAccountModel';
+
+		/* FETCH ZSequelize */
+		let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
+
+		if (validation_accountData.dataValues == null) {
+			return res.status(400).json({
+				result : false,
+				data:{
+					code: 400,
+					message: "Failed no account integrated."
+				},
+			});
+		}
+		let balance = parseInt(validation_accountData.dataValues.balance);
+
+		if (balance < nominal) {
+			return res.status(400).json({
+				result : false,
+				data:{
+					code: 400,
+					message: "Failed, nominal must more than balance."
+				},
+			});
+		}
+
+		/* UPDATE */
+		let update = {
+			balance : balance - nominal
+		};
+
+		let where_container = {
+			accountid: accountid,
+			payment_gateway_name: payment_gateway_name
+		};
+
+		let result_container = await ZSequelize.updateValues(update, where_container, "ApiPaymentGatewayAccountModel");	
+
+		/* FETCTH RESULT & CONDITION & RESPONSE */
+		if (result_container.result) {
+			return res.status(200).json({
+				result : result_container.result,
+				data:{
+					code: 200,
+					message: "Success."
+				}
+			});
+		}else{
+			return res.status(404).json({
+				result : false,
+				data:{
+					code: 404,
+					message: "Data not found."
+				}
+			});
+		}
+	},
+
 	debugMe: async function(req, res){
 
 	}

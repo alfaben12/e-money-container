@@ -33,4 +33,11 @@ router.get(
     EmoneyContainerController.debugMe
 )
 
+router.post(
+    '/updatebalanceapis',
+    JWT.JWTverify,
+    EmoneyContainerController.processUpdateBalanceApi
+)
+
+
 module.exports = router;
