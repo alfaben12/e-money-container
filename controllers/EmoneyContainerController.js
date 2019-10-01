@@ -96,6 +96,7 @@ module.exports = {
 		let nominal = parseInt(req.body.nominal, 10);
 		let uuid = req.body.uuid;
 		let accountid = req.body.accountid;
+		let from_accountid = req.body.from_accountid;
 
 		let mutation_flag = false;
 		request.post('http://bank.kutjur.com/index.php/apis/mutations', {
@@ -155,13 +156,13 @@ module.exports = {
 							
 							let insert = {
 								accountid: accountid,
+								from_accountid: from_accountid,
 								from_payment_gateway_name: from_payment_gateway_name,
 								to_payment_gateway_name: to_payment_gateway_name,
 								nominal: nominal,
 								uuid: uuid,
 								is_transferred: 1
 							};
-							
 							let result_insert = await ZSequelize.insertValues(insert, "AccountPaymentHistoryModel");
 	
 							/* FETCTH RESULT & CONDITION & RESPONSE */
@@ -260,6 +261,7 @@ module.exports = {
 
 							let insert = {
 								accountid: accountid,
+								from_accountid: from_accountid,
 								from_payment_gateway_name: from_payment_gateway_name,
 								to_payment_gateway_name: to_payment_gateway_name,
 								nominal: nominal,
@@ -392,6 +394,7 @@ module.exports = {
 
 						let insert = {
 							accountid: accountid,
+							from_accountid: from_accountid,
 							from_payment_gateway_name: from_payment_gateway_name,
 							to_payment_gateway_name: to_payment_gateway_name,
 							nominal: nominal,
@@ -573,6 +576,44 @@ module.exports = {
 		}
 	},
 
+	processFetchPaymentThirdParty: async function(req, res) {
+		let accountid = req.payload.accountid;
+
+		/* PARAMETER ZSequelize  */
+		let code = req.params.code;
+		/* PARAMETER ZSequelize */
+		let field = ['accountid', 'name', 'payment_gateway_name', 'api_key', 'balance', 'balance'];
+		let where = {
+			accountid: accountid
+		};
+		let orderBy = false;
+		let groupBy = false;
+		let model = 'ApiPaymentGatewayAccountModel';
+
+		/* FETCH ZSequelize */
+		let result = await ZSequelize.fetch(true, field, where, orderBy, groupBy, model);
+
+        /* FETCTH RESULT & CONDITION & RESPONSE */
+		if (result.dataValues != null) {
+            return res.status(200).json({
+				result : result.result,
+				data:{
+					code: 200,
+					message: "Success get data.",
+					data: result.dataValues
+				},
+            });
+		}else{
+			return res.status(404).json({
+				result : result.result,
+				data:{
+					code: 404,
+					message: "Data not found."
+				},
+			});
+		}
+	},
+	
 	debugMe: async function(req, res){
 
 	}

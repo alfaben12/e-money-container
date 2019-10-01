@@ -22,6 +22,12 @@ router.post(
 )
 
 router.get(
+    '/integrations',
+    JWT.JWTverify,
+    EmoneyContainerController.processFetchPaymentThirdParty
+)
+
+router.get(
     '/debugme',
     JWT.JWTverify,
     EmoneyContainerController.debugMe
