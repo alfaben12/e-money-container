@@ -98,6 +98,41 @@ module.exports = {
 		let accountid = req.body.accountid;
 		let from_accountid = req.body.from_accountid;
 
+		/* PARAMETER ZSequelize */
+		let validation_field = ['accountid', 'api_key', 'balance'];
+		let validation_where = {
+			[Op.and]: [{accountid: from_accountid}, {payment_gateway_name: payment_gateway_name}]
+		};
+
+		let validation_orderBy = [['accountid', 'DESC']];
+		let validation_groupBy = false;
+		let validation_model = 'ApiPaymentGatewayAccountModel';
+
+		/* FETCH ZSequelize */
+		let validation_accountData = await ZSequelize.fetch(false, validation_field, validation_where, validation_orderBy, validation_groupBy, validation_model);
+
+		if (validation_accountData.dataValues == null) {
+			return res.status(400).json({
+				result : false,
+				data:{
+					code: 400,
+					message: "Failed no account integrated."
+				},
+			});
+		}
+		
+		let balance = parseInt(validation_accountData.dataValues.balance);
+
+		if (balance < nominal) {
+			return res.status(400).json({
+				result : false,
+				data:{
+					code: 400,
+					message: "Failed, nominal must more than balance."
+				},
+			});
+		}
+
 		let mutation_flag = false;
 		request.post('http://bank.kutjur.com/index.php/apis/mutations', {
 			form: {
