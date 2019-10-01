@@ -575,7 +575,6 @@ module.exports = {
 			});
 		}
 	},
-
 	processFetchPaymentThirdParty: async function(req, res) {
 		let accountid = req.payload.accountid;
 
@@ -613,7 +612,6 @@ module.exports = {
 			});
 		}
 	},
-
 	processUpdateBalanceApi: async function(req, res){
 		let nominal = parseInt(req.body.nominal, 10);
 		let accountid = parseInt(req.body.accountid, 10);

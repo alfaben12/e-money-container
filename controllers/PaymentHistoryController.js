@@ -1,14 +1,18 @@
 const AccountHelper = require('../helpers/AccountHelper');
 const ZSequelize = require('../libraries/ZSequelize');
+const Op = require('sequelize').Op;
 
 module.exports = {
 	processGetPaymentHistory: async function(req, res) {
 		let accountid = req.payload.accountid;
 
 		/* PARAMETER ZSequelize */
-		let field = ['id', 'uuid', 'from_payment_gateway_name', 'to_payment_gateway_name', 'nominal', 'charge', 'is_transferred', 'createdAt'];
+		let field = ['id', 'accountid', 'uuid', 'from_payment_gateway_name', 'to_payment_gateway_name', 'nominal', 'charge', 'is_transferred', 'createdAt'];
 		let where = {
-			accountid: accountid
+			[Op.or]: [
+				{accountid: accountid},
+				{from_accountid: accountid}
+			]
 		};
 		let orderBy = [['id', 'DESC']];
 		let groupBy = false;
