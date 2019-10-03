@@ -54,17 +54,6 @@ module.exports = {
 
 		/* INSERT ZSequelize VOUCHER */
 		let acc_result = await ZSequelize.insertValues(acc_value, "AccountModel");
-
-		/* CHECK KANG PARKIR */
-		if (acc_roleid == 1) {
-			/* PARAMETER ZSequelize VOUCHER  */
-			let assignment_value = {
-				accountid: acc_result.record.id
-			};
-
-			/* INSERT ZSequelize VOUCHER */
-			let assignment_result = await ZSequelize.insertValues(assignment_value, "AssignmentModel");
-		}
 	
 		 /* FETCTH RESULT & CONDITION & RESPONSE */
 		 if (acc_result.result) {

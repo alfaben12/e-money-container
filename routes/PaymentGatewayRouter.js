@@ -13,4 +13,10 @@ router.get(
 	PaymentGatewayController.processGetPaymentGatewayContainer
 );
 
+router.post(
+    '/',
+    JWT.JWTverify,
+	PaymentGatewayController.processAddPaymentApi
+);
+
 module.exports = router;

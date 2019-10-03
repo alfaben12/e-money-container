@@ -41,4 +41,6 @@ const ApiPaymentGatewayAccount = sequelize.define(
 	}
 );
 
+ApiPaymentGatewayAccount.removeAttribute('id');
+
 module.exports = ApiPaymentGatewayAccount;
