@@ -3,6 +3,7 @@ const app = express();
 const con = require('./config/db.js');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const amqp = require('amqplib') 
 const AccountRouter = require('./routes/AccountRouter');
 const LoginRouter = require('./routes/LoginRouter');
 const RegisterRouter = require('./routes/RegisterRouter');
@@ -28,6 +29,39 @@ app.use(function(req, res, next) {
 	}
 });
 
+
+app.use('/mq/producer', function(req, res){
+    amqp.connect('amqp://localhost')
+    .then(conn => {
+        return conn.createChannel().then(ch => {
+            const q = 'thariq'     // Nama antrian adalah 'hello'
+            const msg = 'Hello thariq!'    // Isi pesan yang dikirim ke RabbitMQ
+            
+            const ok = ch.assertQueue(q, { durable: false })    // Membuat antrian 'hello'
+            return ok.then(() => {
+                ch.sendToQueue(q, Buffer.from(msg))     // Mengirim pesan ke RabbitMQ
+                console.log('- Sent', msg)
+                return ch.close()
+            })
+        }).finally(() => conn.close())
+    }).catch(console.warn)
+});
+
+app.use('/logins/notif', function(req, res){
+    amqp.connect('amqp://localhost')
+    .then(conn=> {
+        return conn.createChannel().then(ch => {
+            const ok = ch.assertQueue('login:1', { durable: false })      // Deklarasi antrian
+            ok.then(() => {
+                /* Menangkap pesan yang dikirimkan oleh RabbitMQ */
+                return ch.consume('login:1', msg => console.log('- Received', msg.content.toString()), { noAck: true })
+            })
+            .then(() => {
+                console.log('* Waiting for messages. Ctrl+C to exit')
+            })
+        })
+    }).catch(console.warn)
+});
 
 app.get('/', (req, res) => res.send('Hello INVFEST 4.0 2019!'))
 app.use('/accounts', AccountRouter);

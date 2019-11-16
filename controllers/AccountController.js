@@ -1,17 +1,27 @@
 const AccountHelper = require('../helpers/AccountHelper');
 const ZSequelize = require('../libraries/ZSequelize');
 const Op = require('sequelize').Op;
-
+const redis = require('redis');
 module.exports = {
 	processFetchAccountDatas: async function(req, res) {
 		/* PARAMETER ZSequelize  */
 		let accountid = req.payload.accountid;
+
+		 // create and connect redis client to local instance.
+		 const client = redis.createClient(6379)
+  
+		 // echo redis errors to the console
+		 client.on('error', (err) => {
+			 console.log("Error " + err)
+		 });
 
 		/* FETCH ZSequelize */
 		let account_result = await AccountHelper.getAccount(accountid);
 		
 		/* FETCTH RESULT & CONDITION & RESPONSE */
 		if (account_result.result) {
+			// Save the  API response in Redis store,  data expire time in 3600 seconds, it means one hour
+            client.setex('ZPAY:account:'+account_result.dataValues.id, 3600, JSON.stringify(account_result.dataValues));
 			return res.status(200).json({
 				result : account_result.result,
 				data: {
